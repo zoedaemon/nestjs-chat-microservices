@@ -1,0 +1,22 @@
+{
+  "name": "nestjs-chat-microservices",
+  "version": "0.1.0",
+  "description": "Chat microservices developed with Node.js + Nest.js, MongoDB and RabbitMQ",
+  "scripts": {
+    "start:auth": "cd auth && nest start --watch --port=3000 --rootDir=auth",
+    "lint": "pnpm --prefix auth run lint",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "chat",
+    "microservices",
+    "nestjs",
+    "mongodb",
+    "rabbitmq"
+  ],
+  "author": "Roy Adventus aka zoedaemon",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^29.5.12"
+  }
+}
