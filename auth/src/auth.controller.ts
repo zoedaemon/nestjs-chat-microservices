@@ -2,6 +2,11 @@ import { Body, Controller, HttpException, HttpStatus, Post, Request, UseGuards }
 import { AuthService } from './services/auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { RegisterDto } from './interfaces/dto/register.dto';
+class Response {
+  status: string;
+  statusCode: number;
+  message: string;
+}
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
@@ -12,13 +17,22 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
-  @UseGuards(LocalAuthGuard)    
   @Post('register')
-  async register(@Body() registerDto: RegisterDto): Promise<void> {
+  async register(@Body() registerDto: RegisterDto): Promise<Response> {
     try {
-      await this.authService.register(registerDto);
+      const responseOK = new Response();
+      const user = await this.authService.register(registerDto);
+      responseOK.status = "OK";
+      responseOK.statusCode = 200;
+      responseOK.message = user.username+" created";
+      return responseOK
+      
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      const responseFail = new Response();
+      responseFail.status = "ERROR";
+      responseFail.message = error.message;
+      responseFail.statusCode = HttpStatus.BAD_REQUEST;
+      throw new HttpException(responseFail, HttpStatus.BAD_REQUEST);
     }
   }
 }

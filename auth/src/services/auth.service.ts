@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users.service';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from '../interfaces/dto/register.dto';
-import { User } from 'src/schemas/user.schema';
+import { User } from '../schemas/user.schema';
 
 @Injectable()
 export class AuthService {
@@ -40,9 +40,14 @@ export class AuthService {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    
+    // Create new user document using the Mongoose model
+    const newUser = new User();
+    newUser.username = username;
+    newUser.email = email;
+    newUser.password = hashedPassword;
     // Create new user
-    const newUser =  await this.usersService.createUser({ username, email, password: hashedPassword });
-    return newUser
+    return await this.usersService.createUser(newUser);
   }
 
 }
