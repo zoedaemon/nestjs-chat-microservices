@@ -12,14 +12,16 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthController } from '../src/auth.controller';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { Connection, Model, connect } from 'mongoose';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 // import { before } from 'node:test';
+import * as request from 'supertest';
 
 describe('AuthController', () => {
   let authController: AuthController;
   let mongod: MongoMemoryServer;
   let mongoConnection: Connection;
   let userModel: Model<User>;
-  let mockUserModel: any;
+  let app: INestApplication;
 
   beforeAll(async () => {
     mongod = await MongoMemoryServer.create();
@@ -48,12 +50,17 @@ describe('AuthController', () => {
     
 
     authController = module.get<AuthController>(AuthController);
+
+    app = module.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe({ transform: true, stopAtFirstError: true }));
+    await app.init();
   })
   
   afterAll(async () => {
     await mongoConnection.dropDatabase();
     await mongoConnection.close();
     await mongod.stop();
+    await app.close();
   });
 
   afterEach(async () => {
@@ -97,5 +104,26 @@ describe('AuthController', () => {
       // expect(userModel.save).not.toHaveBeenCalled();
     });
   })
+  
+  it('should throw invalid email', async () => {
+    const registerDto = {
+      username: "newuser",
+      email: "newuserexample.com",
+      password: "testpassword",
+    };
+
+    return request(app.getHttpServer())
+      .post('/auth/register')
+      .send(registerDto)
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .expect(400)
+      .then((res) => {
+        const { error, message, statusCode } = res.body;
+        expect(message[0]).toBe("email must be an email");
+        expect(statusCode).toBe(400);
+        expect(error).toBe("Bad Request")
+      });
+  });
   
 });
