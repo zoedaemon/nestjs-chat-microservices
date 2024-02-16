@@ -15,7 +15,10 @@
     "strictNullChecks": false,
     "noImplicitAny": false,
     "strictBindCallApply": false,
-    "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false
+    "forceConsistentCasingInFileNames": false, //
+    "noFallthroughCasesInSwitch": false,
+    // "esModuleInterop": true, //,
+    "composite": true,
+    // "rootDir": "../",
   }
 }
