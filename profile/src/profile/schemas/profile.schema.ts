@@ -36,7 +36,7 @@ export class Profile extends Document {
   height: number;
 
   @Prop()
-  weight: string;
+  weight: number;
 
   @Prop({ enum: GenderEnum, required: true })
   gender: GenderEnum;

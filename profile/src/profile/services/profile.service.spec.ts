@@ -70,6 +70,7 @@ describe('ProfileService', () => {
   describe('create', () => {
     it('should create a profile', async () => {
       const createProfileDto: CreateProfileDto = {
+        userId: '1',
         name: 'zoed',
         dateOfBirth: new Date(),
         height: 170,

@@ -8,6 +8,8 @@ import {
   Delete,
   HttpException,
   HttpStatus,
+  Req,
+  Logger,
 } from '@nestjs/common';
 import { ProfileService } from './services/profile.service';
 import { CreateProfileDto } from './dto/create-profile.dto';
@@ -15,12 +17,24 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Controller('profile')
 export class ProfileController {
+  private readonly logger = new Logger(ProfileController.name);
   constructor(private readonly profileService: ProfileService) {}
 
   @Post()
-  async create(@Body() createProfileDto: CreateProfileDto) {
+  async create(
+    @Req() req: Request,
+    @Body() createProfileDto: CreateProfileDto,
+  ) {
+    this.logger.log(`User profile retrieved: ${req['userId']}`);
     try {
-      await this.profileService.create(createProfileDto);
+      if (createProfileDto.userId != req['userId']) {
+        throw new HttpException(
+          'unauthorized token for userId or userId is not set',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      createProfileDto.userId = req['userId'];
+      return await this.profileService.create(createProfileDto);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }

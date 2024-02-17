@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ProfileService } from './services/profile.service';
 import { ProfileController } from './profile.controller';
 import { Profile, ProfileSchema } from './schemas/profile.schema';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ProfileMiddleware } from './profile.middleware';
 
 @Module({
   imports: [
@@ -15,6 +16,9 @@ import { MongooseModule } from '@nestjs/mongoose';
   controllers: [ProfileController],
   exports: [ProfileService],
 })
-export class ProfileModule {}
-
-
+export class ProfileModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // Apply the ProfileMiddleware to all routes within the ProfileModule
+    consumer.apply(ProfileMiddleware).forRoutes('profile');
+  }
+}

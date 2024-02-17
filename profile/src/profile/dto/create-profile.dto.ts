@@ -11,6 +11,10 @@ import { GenderEnum, MeasurementSystemEnum } from '../schemas/profile.schema';
 export class CreateProfileDto {
   @IsNotEmpty()
   @IsString()
+  userId: string;
+
+  @IsNotEmpty()
+  @IsString()
   readonly name: string;
 
   @IsNotEmpty()
@@ -19,7 +23,7 @@ export class CreateProfileDto {
 
   @IsNotEmpty()
   @IsEnum(GenderEnum)
-  readonly gender: GenderEnum;
+  gender: GenderEnum;
 
   @IsOptional()
   @IsEnum(MeasurementSystemEnum)
