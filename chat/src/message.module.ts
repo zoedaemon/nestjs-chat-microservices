@@ -1,12 +1,14 @@
 import { Module } from '@nestjs/common';
 import { MessageController } from './api/message.controller';
-import { WebsocketGateway } from './websocket/websocket.gateway';
 import { MessageService } from './message.service';
 import { RabbitMQHandler } from './rabbitmq.handler';
+import { RabbitMQModule } from './rabbitmq.module';
+// import { WebsocketGateway } from './websocket/websocket.gateway';
 
 @Module({
-  imports: [],
+  imports: [RabbitMQModule],
   controllers: [MessageController],
-  providers: [WebsocketGateway, MessageService, RabbitMQHandler],
+  providers: [RabbitMQHandler, MessageService],
+  exports: [RabbitMQHandler, MessageService],
 })
 export class MessageModule {}

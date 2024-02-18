@@ -3,8 +3,8 @@
 import { Injectable } from '@nestjs/common';
 import {
   ClientProxy,
-  ClientProxyFactory,
-  Transport,
+  // ClientProxyFactory,
+  // Transport,
 } from '@nestjs/microservices';
 import * as amqp from 'amqplib';
 // import { WebsocketGateway } from './websocket/websocket.gateway';
@@ -14,39 +14,39 @@ export class RabbitMQHandler {
   private client: ClientProxy;
   // constructor(private readonly websocketGateway: WebsocketGateway)
 
-  constructor() {
-    this.client = ClientProxyFactory.create({
-      transport: Transport.RMQ,
-      options: {
-        urls: ['amqp://localhost:5672'], // RabbitMQ connection URL
-        queue: 'chat_queue', // RabbitMQ queue name
-        queueOptions: {
-          durable: false,
-        },
-      },
-    });
-  }
+  // constructor() {
+  //   this.client = ClientProxyFactory.create({
+  //     transport: Transport.RMQ,
+  //     options: {
+  //       urls: ['amqp://localhost:5672'], // RabbitMQ connection URL
+  //       queue: 'chat_queue', // RabbitMQ queue name
+  //       queueOptions: {
+  //         durable: false,
+  //       },
+  //     },
+  //   });
+  // }
 
-  async handleMessage(message: any) {
-    // Forward the message to connected clients via WebSockets
-    // Example: broadcast message to WebSocket clients
-    this.client.emit('chat_message', message);
-  }
+  // async handleMessage(message: any) {
+  //   // Forward the message to connected clients via WebSockets
+  //   // Example: broadcast message to WebSocket clients
+  //   this.client.emit('chat_message', message);
+  // }
 
-  async startListening() {
-    const connection = await amqp.connect('amqp://localhost');
-    const channel = await connection.createChannel();
+  // async startListening() {
+  //   const connection = await amqp.connect('amqp://localhost');
+  //   const channel = await connection.createChannel();
 
-    const queueName = 'chat_queue';
-    await channel.assertQueue(queueName, { durable: false });
+  //   const queueName = 'chat_queue';
+  //   await channel.assertQueue(queueName, { durable: false });
 
-    channel.consume(queueName, (msg) => {
-      if (msg !== null) {
-        this.handleMessage(msg.content.toString());
-        // channel.ack(msg);//Don't do Ack so can retrieve again and again the data
-      }
-    });
-  }
+  //   channel.consume(queueName, (msg) => {
+  //     if (msg !== null) {
+  //       this.handleMessage(msg.content.toString());
+  //       // channel.ack(msg);//Don't do Ack so can retrieve again and again the data
+  //     }
+  //   });
+  // }
 
   async publishMessage(queueName: string, message: string) {
     const connection = await amqp.connect('amqp://localhost');

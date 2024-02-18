@@ -1,12 +1,15 @@
-import { Module } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { WebSocketModule } from './websocket.module';
 import { MessageModule } from './message.module';
 import { WebsocketGateway } from './websocket/websocket.gateway';
-import { RabbitMQHandler } from './rabbitmq.handler';
+import { CustomWebSocketAdapter } from './websocket/websocket.adapter';
+// import { WebSocketModule } from '@nestjs/websockets';
 
 @Module({
-  imports: [MessageModule, WebsocketGateway, RabbitMQHandler],
+  imports: [WebSocketModule], //MessageModule,
   controllers: [AppController],
   providers: [AppService],
 })
