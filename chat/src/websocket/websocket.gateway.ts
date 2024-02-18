@@ -1,21 +1,31 @@
-// websocket.gateway.ts
-
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   WebSocketGateway,
   WebSocketServer,
   SubscribeMessage,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  MessageBody,
+  ConnectedSocket,
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
 import { Injectable } from '@nestjs/common';
+import { MessageService } from '../message.service';
+import { Server } from 'ws';
+import { Socket } from 'socket.io'; // Or can use socket.io/Server instead ws/Server
 
-@WebSocketGateway()
+@WebSocketGateway({
+  // path: '/ws',
+  // namespace: '/',
+  // transports: ['websocket'],
+})
 @Injectable()
 export class WebsocketGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
-  @WebSocketServer() server: Server;
+  constructor(private readonly messageService: MessageService) {}
+
+  @WebSocketServer()
+  server: Server;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handleConnection(client: any, ...args: any[]) {
@@ -26,9 +36,58 @@ export class WebsocketGateway
     console.log(`Client disconnected: ${client.id}`);
   }
 
-  @SubscribeMessage('chat_message')
-  handleMessage(client: any, payload: any) {
-    // Broadcast the received message to all connected clients
-    this.server.emit('chat_message', payload);
+  @SubscribeMessage('viewMessages')
+  async handleViewMessages(
+    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    data: { userId: string; recipient: string; limit: number; offset: number },
+  ) {
+    // const owner = client.request.user.username; // Retrieve owner's username from WebSocket connection
+    const owner = data.userId;
+    if (data.offset < 0) {
+      return { error: 'Offset must be a non-negative integer' };
+    }
+    if (data.limit < 1 || data.limit > 100) {
+      return { error: 'Limit must be between 1 and 100' };
+    }
+    const listMsgs = await this.messageService.getMessages(
+      owner,
+      data.recipient,
+      data.limit,
+      data.offset,
+    );
+    const clientListeningChannel =
+      'viewMessagesReply' + data.userId + 'to' + data.recipient;
+    const messages = {
+      yourListeningChannel: clientListeningChannel,
+      messages: listMsgs,
+    };
+    this.server.to(client.id).emit('viewMessages', messages); // Send messages to the requesting client
+  }
+
+  @SubscribeMessage('sendMessage')
+  async handleSendMessage(
+    client: any,
+    data: { userId: string; recipient: string; message: string },
+  ) {
+    // const owner = client.request.user.username; // Retrieve owner's username from WebSocket connection
+    const owner = data.userId;
+    await this.messageService.sendMessage(owner, data);
+    const clientListeningChannel =
+      'viewMessagesReply' + data.userId + 'to' + data.recipient;
+    //sent to recipient
+    this.server.emit(clientListeningChannel, data);
+    //sent to sender
+    this.server.to(client.id).emit('sendMessage', data); // Acknowledge the client
+  }
+
+  @SubscribeMessage('ping')
+  handleMessage(_client: any, _data: any) {
+    // this.logger.log(`Message received from client id: ${client.id}`);
+    // this.logger.debug(`Payload: ${data}`);
+    return {
+      event: 'pong',
+      data: 'Wrong data that will make the test fail',
+    };
   }
 }
