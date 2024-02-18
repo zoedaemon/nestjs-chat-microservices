@@ -78,7 +78,11 @@ export class WebsocketGateway
     //sent to recipient
     this.server.emit(clientListeningChannel, data);
     //sent to sender
-    this.server.to(client.id).emit('sendMessage', data); // Acknowledge the client
+    const reply = {
+      status: true,
+      data: data,
+    };
+    this.server.to(client.id).emit('sendMessage', reply); // Acknowledge the client
   }
 
   @SubscribeMessage('ping')
@@ -87,7 +91,7 @@ export class WebsocketGateway
     // this.logger.debug(`Payload: ${data}`);
     return {
       event: 'pong',
-      data: 'Wrong data that will make the test fail',
+      data: 'OK',
     };
   }
 }
