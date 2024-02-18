@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { RabbitMQHandler } from '../rabbitmq.handler';
+import { RabbitMQHandler } from './rabbitmq.handler';
 
 @Injectable()
 export class MessageService {
@@ -22,7 +22,11 @@ export class MessageService {
   ) {
     // Publish the message to RabbitMQ for the specific chat conversation
     const queueName = this.generateQueueName(owner, messageData.recipient);
-    await this.rabbitMQHandler.publishMessage(queueName, messageData.message);
+    const status = await this.rabbitMQHandler.publishMessage(
+      queueName,
+      messageData.message,
+    );
+    return { status: status };
   }
 
   private generateQueueName(owner: string, recipient: string): string {

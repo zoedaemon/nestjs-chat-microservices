@@ -7,10 +7,12 @@ import {
   Transport,
 } from '@nestjs/microservices';
 import * as amqp from 'amqplib';
+// import { WebsocketGateway } from './websocket/websocket.gateway';
 
 @Injectable()
 export class RabbitMQHandler {
   private client: ClientProxy;
+  // constructor(private readonly websocketGateway: WebsocketGateway)
 
   constructor() {
     this.client = ClientProxyFactory.create({
@@ -41,7 +43,7 @@ export class RabbitMQHandler {
     channel.consume(queueName, (msg) => {
       if (msg !== null) {
         this.handleMessage(msg.content.toString());
-        channel.ack(msg);
+        // channel.ack(msg);//Don't do Ack so can retrieve again and again the data
       }
     });
   }
@@ -53,10 +55,14 @@ export class RabbitMQHandler {
     await channel.assertQueue(queueName, { durable: true });
 
     // Publish the message to RabbitMQ queue
-    channel.sendToQueue(queueName, Buffer.from(message), { persistent: true });
+    const resp = channel.sendToQueue(queueName, Buffer.from(message), {
+      persistent: true,
+    });
 
     await channel.close();
     await connection.close();
+
+    return resp;
   }
 
   async consumeMessages(queueName: string, limit?: number, offset?: number) {
@@ -72,7 +78,7 @@ export class RabbitMQHandler {
         if (consumedMessages >= offset && messages.length < limit) {
           messages.push(msg.content.toString());
         }
-        channel.ack(msg);
+        // channel.ack(msg);//Don't do Ack so can retrieve again and again the data
         consumedMessages++;
       }
     });
