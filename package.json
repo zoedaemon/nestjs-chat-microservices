@@ -18,5 +18,8 @@
   "license": "ISC",
   "devDependencies": {
     "@types/jest": "^29.5.12"
+  },
+  "dependencies": {
+    "@nestjs-chat-microservices/auth": "link:auth"
   }
 }

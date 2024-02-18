@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users.service';
 import * as bcrypt from 'bcrypt';
@@ -7,6 +7,8 @@ import { User, UserDocument } from '../schemas/user.schema';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
@@ -22,9 +24,13 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = { username: user.username, sub: user.userId };
+    const payload = { username: user.username, sub: user._doc._id };
+    this.logger.log(
+      `Logging in: ${JSON.stringify(payload, null, 2)}`,
+    );
     return {
       access_token: this.jwtService.sign(payload),
+      id: user._doc._id,
     };
   }
 

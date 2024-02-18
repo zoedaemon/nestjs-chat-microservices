@@ -5,7 +5,6 @@ import { User, UserSchema} from '../src/schemas/user.schema';
 import { UsersService } from '../src/services/users.service';
 import { LocalStrategy } from '../src/local.strategy';
 import { JwtModule } from '@nestjs/jwt';
-import {MockUserModel} from './mocks/user.model.mock';
 import { JwtStrategy } from '../src/jwt.strategy';
 import { UsersModule } from '../src/users.module';
 import { PassportModule } from '@nestjs/passport';
@@ -104,7 +103,7 @@ describe('AuthController', () => {
       // expect(userModel.save).not.toHaveBeenCalled();
     });
   })
-  
+
   it('should throw invalid email', async () => {
     const registerDto = {
       username: "newuser",
@@ -125,5 +124,8 @@ describe('AuthController', () => {
         expect(error).toBe("Bad Request")
       });
   });
-  
+
+  // "username should not be empty"
+  // "password should not be empty"
+  // "password must be longer than or equal to 6 characters"
 });

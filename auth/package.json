@@ -1,5 +1,5 @@
 {
-  "name": "auth",
+  "name": "@nestjs-chat-microservices/auth",
   "version": "0.0.1",
   "description": "",
   "author": "",
